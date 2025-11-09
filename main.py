@@ -17,7 +17,7 @@ group_usernames = [
     #'Acs_Udvash_Link', 
     # 'thejournyofsc24',  <-- এই ভুল নামটি ডিলিট করা হয়েছে
     #'hsc_sharing', 'ACSDISCUSSION',
-    'HHEHRETW', 'chemistryteli', 'hsc234', 'buetkuetruetcuet', 'linkedstudies',
+    'hscacademicandadmissionchatgroup', 'HHEHRETW', 'chemistryteli', 'hsc234', 'buetkuetruetcuet', 'linkedstudies',
     #'studywar2021', 'DiscussionGroupEngineering', 'buetkuetruetcuet',
     #'superb1k', 'Dacs2025',
 ]
