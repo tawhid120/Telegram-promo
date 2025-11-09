@@ -45,11 +45,7 @@ message_to_send = """
 """
 
 # --- Bot Logic ---
-# এই ডিকশনারিতে প্রতিটি গ্রুপের শেষ মেসেজ আসার সময় সেভ থাকবে
-# { group_id: last_message_timestamp }
 group_last_message_time = {}
-
-# কত সেকেন্ড অপেক্ষা করতে হবে
 WAIT_TIME = 15
 
 client = TelegramClient(
@@ -62,34 +58,24 @@ client = TelegramClient(
 # --- নতুন মেসেজ হ্যান্ডলার ---
 @client.on(events.NewMessage(chats=group_usernames))
 async def handler(event):
-    # নিজের মেসেজ ইগনোর করবে
     if event.message.sender_id == (await client.get_me()).id:
         return
 
     sender = await event.get_sender()
     
-    # রিকোয়ারমেন্ট ১: অ্যাডমিন বা বট হলে ইগনোর করা (সবচেয়ে নির্ভরযোগ্য উপায়)
+    # রিকোয়ারমেন্ট ১: অ্যাডমিন বা বট হলে ইগনোর করা
     if sender.bot or sender.admin_rights:
-        # print(f"Ignored message from bot/admin in {event.chat.title}")
         return
 
     # রিকোয়ারমেন্ট ২: টাইমার রিসেট করা
-    # যদি সাধারণ ইউজার মেসেজ দেয়, তবে সেই গ্রুপের জন্য টাইমার রিসেট করো
     group_id = event.chat_id
-    # asyncio এর নিজস্ব time ফাংশন ব্যবহার করা
     group_last_message_time[group_id] = asyncio.get_event_loop().time()
-    # print(f"Timer reset for group {group_id}")
 
 # --- ব্যাকগ্রাউন্ড পোস্টিং টাস্ক ---
 async def poster_task(group_id, group_title):
-    """
-    প্রতিটি গ্রুপের জন্য এই ফাংশনটি আলাদাভাবে চলবে।
-    এটি চেক করবে কখন শেষ মেসেজ এসেছে এবং ১৫ সেকেন্ড পার হয়েছে কিনা।
-    """
     print(f"✅ Poster task started for: {group_title}")
     
     # টাস্ক শুরু হওয়ার সময়কে প্রথম মেসেজ টাইম ধরে নিচ্ছি
-    # যাতে বট চালু হয়েই মেসেজ না দেয়, ১৫ সেকেন্ড অপেক্ষা করে
     group_last_message_time[group_id] = asyncio.get_event_loop().time()
 
     while True:
@@ -103,6 +89,13 @@ async def poster_task(group_id, group_title):
             
             # যদি ১৫ সেকেন্ডের বেশি সময় কোনো মেসেজ না আসে
             if time_since_last_message > WAIT_TIME:
+                
+                # --- FIX: Immediately reset timer ---
+                # এই লাইনটি একাধিক মেসেজ পাঠানো বন্ধ করবে।
+                # মেসেজ পাঠানোর আগেই সময় রিসেট করা হয়।
+                group_last_message_time[group_id] = loop_time
+                # --- End Fix ---
+
                 print(f"Posting in {group_title} after {time_since_last_message:.0f}s of inactivity...")
                 try:
                     await client.send_message(
@@ -119,13 +112,11 @@ async def poster_task(group_id, group_title):
                 except FloodWaitError as e:
                     print(f"Flood wait in {group_title}. Sleeping for {e.seconds}s.")
                     await asyncio.sleep(e.seconds)
+                    # Flood wait এর পর আবার টাইমার রিসেট করা
+                    group_last_message_time[group_id] = asyncio.get_event_loop().time()
                 except Exception as e:
                     print(f"An error occurred while posting in {group_title}: {e}")
-                
-                # পোস্ট সফল হোক বা না হোক, টাইমার রিসেট করে দাও
-                # যাতে পরের পোস্টের জন্য আবার ১৫ সেকেন্ড অপেক্ষা করে
-                group_last_message_time[group_id] = asyncio.get_event_loop().time()
-
+                    # কোনো এরর হলেও, টাইমার আগেই রিসেট হয়ে গেছে, তাই আবার ১৫ সেকেন্ড অপেক্ষা করবে।
 
         except Exception as e:
             print(f"Error in poster_task for {group_title}: {e}")
@@ -147,7 +138,6 @@ async def main_bot_logic():
                 group_id = entity.id
                 group_title = entity.title
                 
-                # প্রতিটি গ্রুপের জন্য আলাদা একটি poster_task চালু করা
                 task = asyncio.create_task(poster_task(group_id, group_title))
                 tasks.append(task)
                 
@@ -170,4 +160,3 @@ if __name__ == "__main__":
     if session_string:
         print("Starting Telethon client...")
         asyncio.run(main_bot_logic())
-
