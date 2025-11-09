@@ -14,10 +14,10 @@ if not session_string:
 
 # --- group_usernames লিস্ট থেকে 'thejournyofsc24' সরানো হয়েছে ---
 group_usernames = [
-    #'Acs_Udvash_Link', 'buetkuetruetcuet', 'linkedstudies',
+    #'Acs_Udvash_Link', 
     # 'thejournyofsc24',  <-- এই ভুল নামটি ডিলিট করা হয়েছে
     #'hsc_sharing', 'ACSDISCUSSION',
-    'HHEHRETW', 'chemistryteli', 'hsc234',
+    'HHEHRETW', 'chemistryteli', 'hsc234', 'buetkuetruetcuet', 'linkedstudies',
     #'studywar2021', 'DiscussionGroupEngineering', 'buetkuetruetcuet',
     #'superb1k', 'Dacs2025',
 ]
