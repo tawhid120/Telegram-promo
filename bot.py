@@ -3,14 +3,11 @@ import os
 from telethon import TelegramClient, events, sessions
 from telethon.errors.rpcerrorlist import FloodWaitError, UserBannedInChannelError, ChatWriteForbiddenError
 
-# --- Your Telegram API Credentials ---
+# --- Configuration (All unchanged) ---
 api_id = 20193909
 api_hash = '82cd035fc1eb439bda68b2bfc75a57cb'
-
-# --- Session Configuration ---
 session_string = os.environ.get('TELETHON_SESSION_STRING')
 
-# --- Target Configuration ---
 group_usernames = [
     'Acs_Udvash_Link', 'buetkuetruetcuet', 'linkedstudies',
     'thejournyofsc24', 'hsc_sharing', 'ACSDISCUSSION',
@@ -35,14 +32,13 @@ Join Now: ⬇️
  [https://t.me/Spoken_English_Zone](https://t.me/Spoken_English_Zone)
 """
 
-# Initialize the Telegram client using StringSession
 client = TelegramClient(
     sessions.StringSession(session_string), 
     api_id, 
     api_hash
 )
 
-# --- বট হ্যান্ডলার (আপনার মূল লজিক) ---
+# --- Bot Handlers (Unchanged) ---
 @client.on(events.NewMessage(chats=group_usernames))
 async def handler(event):
     if event.is_private or event.message.sender_id == (await client.get_me()).id:
@@ -60,8 +56,9 @@ async def handler(event):
     except Exception as e:
         print(f"An error occurred: {e}")
 
-# --- বট চালু করার প্রধান ফাংশন ---
-async def start_telethon_bot():
+# --- Async Main Function ---
+async def main_bot_logic():
+    """ এটি হলো মূল async ফাংশন যা বটটি চালায় """
     if not session_string:
         print("CRITICAL ERROR in bot.py: TELETHON_SESSION_STRING not set.")
         return
@@ -72,5 +69,17 @@ async def start_telethon_bot():
         print("SUCCESS: Client is connected and listening.")
         await client.run_until_disconnected()
     except Exception as e:
-        print(f"Telethon client failed to start: {e}")
+        print(f"Telethon client failed to start or crashed: {e}")
+        # আপনি এখানে লগইন ব্যর্থতার জন্য নির্দিষ্ট এরর যোগ করতে পারেন
+        # যেমন, সেশন স্ট্রিং ভুল হলে:
+        if "string given is not valid" in str(e):
+            print("CRITICAL ERROR: The TELETHON_SESSION_STRING is invalid or expired.")
 
+# --- Sync Starter Function (NEW) ---
+def run_bot():
+    """
+    এই sync ফাংশনটি app.py দ্বারা কল হবে।
+    এটি নিজেই একটি নতুন asyncio ইভেন্ট লুপ তৈরি এবং চালাবে।
+    """
+    print("asyncio.run() is called from bot.py")
+    asyncio.run(main_bot_logic())
