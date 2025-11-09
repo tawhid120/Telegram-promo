@@ -37,8 +37,7 @@ message_to_send = """
 **✮  Index  ✮**
 
 **❶** **[HSC26 PCMB All Course](https://t.me/HSCGeniusHubMZ/92)**
-**❷** **[HSC27 PCMB All Course](https://t.me/HSCGeniusHubMZ/93)** 
-**❸** **[All EBI Course](https://t.me/HSCGeniusHubMZ/94)**
+**❷** **[HSC27 PCMB All Course](https://t.me/HSCGeniusHubMZ/93)** **❸** **[All EBI Course](https://t.me/HSCGeniusHubMZ/94)**
 
 **➟ তাহলে আর দেরি কেন? এখনই** **[HSC Genius Hub](https://t.me/HSCGeniusHubMZ)** **এর সাথে যুক্ত হও!!**
 
@@ -58,7 +57,8 @@ client = TelegramClient(
 # --- Bot Handler ---
 @client.on(events.NewMessage(chats=group_usernames))
 async def handler(event):
-    if event.is_private or event.message.sender_id == (await client.get_me()).id:
+    # পরিবর্তনটি এখানে করা হয়েছে: event.bot চেক যোগ করা হয়েছে
+    if event.is_private or event.message.sender_id == (await client.get_me()).id or event.bot:
         return
     print(f"New message detected in group '{event.chat.title}'. Posting...")
     try:
