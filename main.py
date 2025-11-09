@@ -156,7 +156,7 @@ async def handler(event):
         await client.send_message(
             event.chat_id,
             message_to_send,
-            file=image_path,
+            #file=image_path,
             parse_mode='md'
         )
         print("Advertisement posted successfully.")
