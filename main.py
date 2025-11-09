@@ -6,7 +6,7 @@ from telethon.errors.rpcerrorlist import FloodWaitError, UserBannedInChannelErro
 # --- Configuration ---
 api_id = 20193909
 api_hash = '82cd035fc1eb439bda68b2bfc75a57cb'
-session_string = os.environ.get('TELETHON_SESSION_STRING') 
+session_string = os.environ.get('STRING_SESSION') 
 
 if not session_string:
     print("CRITICAL ERROR: TELETHON_SESSION_STRING environment variable not set.")
