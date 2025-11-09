@@ -6,13 +6,10 @@ from telethon.errors.rpcerrorlist import FloodWaitError, UserBannedInChannelErro
 # --- Configuration ---
 api_id = 20193909
 api_hash = '82cd035fc1eb439bda68b2bfc75a57cb'
-
-# Sevella-এর Environment Variable থেকে সেশন স্ট্রিং লোড হচ্ছে
 session_string = os.environ.get('TELETHON_SESSION_STRING') 
 
 if not session_string:
     print("CRITICAL ERROR: TELETHON_SESSION_STRING environment variable not set.")
-    print("Please set this variable in your Sevella dashboard.")
     exit()
 
 group_usernames = [
@@ -22,7 +19,7 @@ group_usernames = [
     'studywar2021', 'DiscussionGroupEngineering', 'buetkuetruetcuet',
     'superb1k', 'Dacs2025',
 ]
-image_path = 'Replit.jpg' # এই ছবিটিও গিটহাবে আপলোড করতে হবে
+image_path = 'Replit.jpg'
 message_to_send = """
 🤫 **ছাত্রজীবনের কয়েকটি গোপন চ্যানেল!**
 
@@ -34,7 +31,7 @@ message_to_send = """
 
 🗣️ Spoken English Zone 🇬🇧
 Spoken English, Vocabulary, Grammar ও IELTS শেখো সহজভাবে বাংলাসহ।
-👉 ইংরেজি শেখার পারফেক্ট চ্যানেল!
+👉 ইংরেজি শেখার পারফ- --קט চ্যানেল!
 Join Now: ⬇️
  [https://t.me/Spoken_English_Zone](https://t.me/Spoken_English_Zone)
 """
@@ -69,7 +66,11 @@ async def main_bot_logic():
     try:
         await client.start()
         print("SUCCESS: Client is connected and listening.")
-        await client.run_until_disconnected()
+        
+        # --- এই লাইনটিই আপনার কোডে মিসিং ---
+        await client.run_until_disconnected() 
+        # ------------------------------------
+        
     except Exception as e:
         print(f"Telethon client failed to start or crashed: {e}")
         if "string given is not valid" in str(e):
