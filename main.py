@@ -1,23 +1,40 @@
+# m5_final_simplified_v1.py
+
 import asyncio
-import os
-from telethon import TelegramClient, events, sessions
-from telethon.errors.rpcerrorlist import FloodWaitError, UserBannedInChannelError, ChatWriteForbiddenError
-from telethon.tl.types import ChannelParticipantsAdmins
+import logging
+import os  # <-- os ইমপোর্ট করা হয়েছে
+from telethon import TelegramClient, events, sessions  # <-- sessions ইমপোর্ট করা হয়েছে
+from telethon.tl.types import User
+from telethon.errors.rpcerrorlist import (
+    FloodWaitError, UserBannedInChannelError, ChatWriteForbiddenError
+)
 
-# --- Configuration ---
-api_id = 20193909
-api_hash = '82cd035fc1eb439bda68b2bfc75a57cb
-session_string = os.environ.get('STRING_SESSION') 
+# --- Standard Logging Setup (কালারফুল লগ সরানো হয়েছে) ---
+logging.basicConfig(
+    level=logging.INFO,
+    format='[%(asctime)s] %(levelname)s: %(message)s',
+    datefmt='%H:%M:%S'
+)
+logging.getLogger('telethon').setLevel(logging.WARNING)
 
-if not session_string:
-    print("CRITICAL ERROR: STRING_SESSION environment variable not set.")
+# --- অ্যাকাউন্ট ক্রেডেনশিয়াল (String Session) ---
+STRING_SESSION = os.environ.get('STRING_SESSION')
+if not STRING_SESSION:
+    logging.critical("CRITICAL: 'STRING_SESSION' Replit Secrets এ সেট করা নেই।")
     exit()
 
-# --- group_usernames লিস্ট ---
+api_id = 20193909
+api_hash = '82cd035fc1eb439bda68b2bfc75a57cb'
+
+# --- Groups to Monitor ---
 group_usernames = [
-    'hscacademicandadmissionchatgroup', 'HHEHRETW', 'chemistryteli', 'hsc234', 'buetkuetruetcuet', 'linkedstudies',
+    'chemistryteli', 'hsc_sharing', 'linkedstudies', 'hsc234', 'buetkuetruetcuet',
+    'thejournyofhsc24', 'haters_hsc', 'Dacs2025', 'superb1k', 'studywar2021',
+    'hscacademicandadmissionchatgroup', 'Acs_Udvash_Link', 'DiscussionGroupEngineering', 'HHEHRETW'
 ]
-image_path = 'Replit1.jpg'
+
+# --- Image and Message Details (Updated) ---
+image_path = 'Replit1.jpg' # <-- আপনার অন্য কোড অনুযায়ী নামটি Replit1.jpg করা হয়েছে
 message_to_send = """
 **[𝐇𝐒𝐂 𝐆𝐞𝐧𝐢𝐮𝐬 𝐇𝐮𝐛](https://t.me/HSCGeniusHubMZ)**
                                            
@@ -33,7 +50,8 @@ message_to_send = """
 **✮  Index  ✮**
 
 **❶** **[HSC26 PCMB All Course](https://t.me/HSCGeniusHubMZ/92)**
-**❷** **[HSC27 PCMB All Course](https://t.me/HSCGeniusHubMZ/93)** **❸** **[All EBI Course](https://t.me/HSCGeniusHubMZ/94)**
+**❷** **[HSC27 PCMB All Course](https://t.me/HSCGeniusHubMZ/93)** 
+**❸** **[All EBI Course](https://t.me/HSCGeniusHubMZ/94)**
 
 **➟ তাহলে আর দেরি কেন? এখনই** **[HSC Genius Hub](https://t.me/HSCGeniusHubMZ)** **এর সাথে যুক্ত হও!!**
 
@@ -44,107 +62,121 @@ message_to_send = """
 **────୨ৎ────**
 """
 
-# --- Bot Logic ---
-# প্রতিটি গ্রুপের জন্য pending task ট্র্যাক করার জন্য dictionary
-pending_tasks = {}
+# --- Client and other variables (একটি ক্লায়েন্টে সিম্পল করা) ---
+client = TelegramClient(sessions.StringSession(STRING_SESSION), api_id, api_hash)
+own_ids = set()
+debounce_tasks = {}
+DEBOUNCE_DELAY = 15 # আপনার ১৫ সেকেন্ড ডিলে
 
-# কত সেকেন্ড অপেক্ষা করতে হবে
-WAIT_TIME = 15
+async def find_and_verify_groups(client_to_check, target_usernames):
+    """Iterates through the client's dialogs to find groups."""
+    logging.info("\n--- Finding and Verifying Target Groups ---")
+    accessible_entities = {}
+    target_set = set(u.lower() for u in target_usernames)
 
-client = TelegramClient(
-    sessions.StringSession(session_string), 
-    api_id, 
-    api_hash,
-    system_version="4.16.30-vxCUSTOM"
-)
-
-async def send_advertisement(chat_id, chat_title):
-    """15 সেকেন্ড পর advertisement পাঠানোর function"""
+    logging.info("Searching for groups in the account's chat list...")
     try:
-        print(f"✅ 15s quiet. Sending advertisement to '{chat_title}'...")
+        async for dialog in client_to_check.iter_dialogs():
+            if hasattr(dialog.entity, 'username') and dialog.entity.username:
+                username_lower = dialog.entity.username.lower()
+                if username_lower in target_set and username_lower not in accessible_entities:
+                    accessible_entities[username_lower] = dialog.entity
+    except Exception as e:
+        logging.error(f"Could not fetch dialogs: {e}")
+
+    logging.info("\n--- Verification Report ---")
+    found_usernames = set(accessible_entities.keys())
+    
+    for username in target_set:
+        if username in found_usernames:
+            logging.info(f"✅ SUCCESS: Found group '@{username}'")
+        else:
+            logging.error(f"❌ FAILED: Could not find '@{username}'. Ensure the account has joined this group.")
+            
+    return list(accessible_entities.values())
+
+async def send_promotional_message(chat_id, chat_title):
+    """Sends the message using the single client."""
+    logging.info(f"Silence period ended for '{chat_title}'. Preparing to send promotional message...")
+    message_sent = False
+
+    try:
+        logging.info(f"  -> Attempting to send message...")
         await client.send_message(
-            chat_id,
-            message_to_send,
-            file=image_path,
-            parse_mode='md'
+            chat_id, 
+            message_to_send, 
+            file=image_path, 
+            parse_mode='md', 
+            link_preview=False
         )
-        print(f"✅ Advertisement posted successfully in '{chat_title}'.")
-    except (UserBannedInChannelError, ChatWriteForbiddenError):
-        print(f"❌ Cannot post in {chat_title}. Bot is banned or restricted.")
+        logging.info(f"  ✅ SUCCESS: Message sent to '{chat_title}'.")
+        message_sent = True
+    except (ChatWriteForbiddenError, UserBannedInChannelError):
+        logging.warning(f"  ⚠️ WARNING: Account is banned or can't post in '{chat_title}'.")
     except FloodWaitError as e:
-        print(f"Flood wait in {chat_title}. Sleeping for {e.seconds}s.")
+        logging.warning(f"  ⏳ FLOOD WAIT: Must wait for {e.seconds}s.")
         await asyncio.sleep(e.seconds)
+        # Flood wait এর পর আবার চেষ্টা করা হবে না, পরবর্তী মেসেজের জন্য অপেক্ষা করবে
+    except FileNotFoundError:
+        logging.error(f"  ❌ FATAL: Image file not found at '{image_path}'.")
     except Exception as e:
-        print(f"Error posting advertisement in '{chat_title}': {e}")
-    finally:
-        # Task complete হওয়ার পর pending_tasks থেকে remove করা
-        if chat_id in pending_tasks:
-            del pending_tasks[chat_id]
+        logging.error(f"  ❌ UNEXPECTED ERROR in '{chat_title}': {e}")
 
-# --- Bot Handler ---
-@client.on(events.NewMessage(chats=group_usernames))
-async def handler(event):
-    # ১. নিজের মেসেজ ইগনোর করা
-    if event.message.sender_id == (await client.get_me()).id:
-        return
+    if not message_sent:
+        logging.critical(f"⛔️ FINAL FAILURE: Failed to send message to '{chat_title}'.")
+    
+    if chat_id in debounce_tasks:
+        del debounce_tasks[chat_id]
 
-    # ২. অ্যাডমিন বা বট-এর মেসেজ ইগনোর করা (সবচেয়ে নির্ভরযোগ্য উপায়)
-    try:
-        sender = await event.get_sender()
-        if sender.bot or sender.admin_rights:
-            # print(f"Ignored admin/bot message in {event.chat.title}")
-            return
-    except Exception as e:
-        # কোনো কারণে sender check করতে না পারলে (যেমন, banned user) ইগনোর করা
-        # print(f"Could not check sender in {event.chat.title}: {e}")
+async def message_handler(event):
+    """Handles new messages and resets the debounce timer."""
+    sender = await event.get_sender()
+    if not isinstance(sender, User) or sender.bot or sender.id in own_ids:
+        if sender and hasattr(sender, 'bot') and sender.bot:
+            logging.debug(f"Ignoring a message from bot in '{event.chat.title}'.")
         return
     
-    # ৩. সাধারণ ইউজার মেসেজ দিলে টাইমার রিসেট/স্টার্ট করা
-    chat_id = event.chat_id
-    chat_title = event.chat.title
+    logging.info(f"\n–––––––––––––––––––––––\n📲 NEW MESSAGE in '{event.chat.title}' from '{sender.first_name}'")
     
-    # ৪. যদি এই গ্রুপের জন্য আগে থেকেই কোনো পোস্ট পেন্ডিং থাকে, সেটা বাতিল করা
-    if chat_id in pending_tasks:
-        pending_tasks[chat_id].cancel()
-        # print(f"Timer reset for {chat_title}.")
-    
-    # ৫. ১৫ সেকেন্ড পর পোস্ট করার জন্য নতুন একটি টাস্ক তৈরি করা
-    async def wait_and_send():
+    chat_id = event.chat.id
+    if chat_id in debounce_tasks:
+        debounce_tasks[chat_id].cancel()
+        
+    async def schedule_send():
         try:
-            await asyncio.sleep(WAIT_TIME)
-            # ১৫ সেকেন্ড সফলভাবে অপেক্ষা শেষ হলে, মেসেজ পাঠানো
-            await send_advertisement(chat_id, chat_title)
+            logging.info(f"⏳ Scheduling response for '{event.chat.title}' in {DEBOUNCE_DELAY} seconds.")
+            await asyncio.sleep(DEBOUNCE_DELAY)
+            await send_promotional_message(chat_id, event.chat.title)
         except asyncio.CancelledError:
-            # যদি এই টাস্কটি বাতিল করা হয় (অর্থাৎ নতুন মেসেজ আসে)
-            # print(f"Posting to {chat_title} cancelled by new message.")
-            pass # এখানে কিছু করার দরকার নেই
+            logging.info(f"⏰ Timer for '{event.chat.title}' was reset by a newer message.")
+            
+    debounce_tasks[chat_id] = asyncio.create_task(schedule_send())
 
-    # নতুন টাস্কটি pending_tasks-এ সেভ করা
-    pending_tasks[chat_id] = asyncio.create_task(wait_and_send())
-    # print(f"New 15s timer started for {chat_title}.")
+async def main():
+    logging.info("Connecting Client...")
+    await client.start()
+    logging.info("✅ Client Connected.")
+    
+    me = await client.get_me()
+    own_ids.add(me.id)
+    logging.info(f"Own account ID identified: {me.id}")
 
+    accessible_groups = await find_and_verify_groups(client, group_usernames)
+    
+    if not accessible_groups:
+        logging.critical("⛔️ No target groups found. The bot will not monitor any chats. Exiting.")
+        return
 
-# --- Main Bot Function ---
-async def main_bot_logic():
-    print("Bot starting with Telethon String Session...")
-    try:
-        await client.start()
-        print("SUCCESS: Client is connected and listening.")
-        print(f"Monitoring {len(group_usernames)} groups.")
-        print(f"Will post after {WAIT_TIME} seconds of inactivity from non-admin users.")
-        
-        # এই লাইনটি বটকে ২৪/৭ চালু রাখে
-        await client.run_until_disconnected() 
-        
-    except ValueError as e:
-        print(f"CRITICAL ERROR: A username in your list is invalid: {e}")
-    except Exception as e:
-        print(f"Telethon client failed to start or crashed: {e}")
-        if "string given is not valid" in str(e):
-            print("CRITICAL ERROR: The STRING_SESSION is invalid or expired.")
+    logging.info(f"\n✅ Bot is now monitoring {len(accessible_groups)} groups. Waiting for messages...")
+    
+    client.add_event_handler(message_handler, events.NewMessage(chats=accessible_groups))
+    
+    await client.run_until_disconnected()
 
-# --- Start the bot ---
 if __name__ == "__main__":
-    if session_string:
-        print("Starting Telethon client...")
-        asyncio.run(main_bot_logic())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        logging.info("\nBot stopped by user.")
+    except Exception as e:
+        logging.critical(f"A critical error occurred in the main execution: {e}", exc_info=True)
