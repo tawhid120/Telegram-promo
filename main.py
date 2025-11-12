@@ -15,14 +15,14 @@ from telethon.errors import (
 from datetime import datetime
 
 # --- ১. লগিং এবং কনফিগারেশন ---
-logging.basicConfig(
+#logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     datefmt='%H:%M:%S'
 )
 
-api_id = 20193909
-api_hash = '82cd035fc1eb439bda68b2bfc75a57cb'
+#api_id = 20193909
+#api_hash = '82cd035fc1eb439bda68b2bfc75a57cb'
 
 # আপনার সেশন ভেরিয়েবলগুলো এনভায়রনমেন্ট বা সরাসরি এখানে দিন
 session_strings = [
