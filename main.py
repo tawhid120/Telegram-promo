@@ -33,7 +33,7 @@ session_strings = [
 target_groups = [
     'chemistryteli', 'hsc_sharing', 'linkedstudies', 'hsc234', 'buetkuetruetcuet',
     'thejournyofhsc24', 'haters_hsc', 'Dacs2025', 'superb1k', 'studywar2021',
-    'hscacademicandadmissionchatgroup', 'Acs_Udvash_Link', 'DiscussionGroupEngineering', 'HHEHRETW'
+    'Acs_Udvash_Link', 'DiscussionGroupEngineering', 'HHEHRETW'
 ]
 
 image_path = 'replit2.jpg' 
