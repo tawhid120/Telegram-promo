@@ -36,7 +36,7 @@ target_groups = [
     'hscacademicandadmissionchatgroup', 'Acs_Udvash_Link', 'DiscussionGroupEngineering', 'HHEHRETW'
 ]
 
-image_path = 'Replit2.jpg' 
+image_path = 'replit2.jpg' 
 
 message_text = """
 **HSC & ADMISSION ZONE**
