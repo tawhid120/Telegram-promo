@@ -36,33 +36,29 @@ target_groups = [
     'hscacademicandadmissionchatgroup', 'Acs_Udvash_Link', 'DiscussionGroupEngineering', 'HHEHRETW'
 ]
 
-image_path = 'Replit1.jpg' 
+image_path = 'Replit2.jpg' 
 
 message_text = """
-**[𝐇𝐒𝐂 𝐆𝐞𝐧𝐢𝐮𝐬 𝐇𝐮𝐛](https://t.me/HSCGeniusHubMZ)**
-                                           
-**♛ HSC শিক্ষার্থীদের জন্য সাজানো-গোছানো স্টাডি কোর্স**
+**HSC & ADMISSION ZONE**
+**বিশ্বস্ততার সঙ্গে বিজ্ঞান ও আর্টস বিভাগের একাডেমিক ও অ্যাডমিশন বিষয়ক বিভিন্ন শিক্ষামুলক কোর্স  ফ্রি এবং স্বল্পমুল্যে প্রদান করে আসছে আমাদের চ্যানেল!**
 
-**ⓘ** সম্পূর্ণ ফ্রী এবং রিজনেবল প্রাইসে প্রিমিয়াম কোর্স!
+➥ INDEX
 
-**❖** মানসম্মত সাজানো গোছানো লেকচার 
-**❖** পরীক্ষার জন্য বিশেষ গাইড ও প্রস্তুতি সহায়ক
+🔴[25 ALL Admission Course](https://t.me/HSC_ADMISSION_ZONE/543)
+         [25 FREE ADMISSION COURSE](https://t.me/HSC_ADMISSION_ZONE/549)
 
-**֎ আপনার পড়াশোনাকে করুন আরও সহজ, স্মার্ট ও কার্যকরী!**
+🟢[26 ALL Academic Course](https://t.me/HSC_ADMISSION_ZONE/2)
+           [26 ALL FREE COURSE](https://t.me/HSC_ADMISSION_ZONE/779)
 
-**✮  Index  ✮**
+🔵[27 ALL Academic  Course](https://t.me/HSC_ADMISSION_ZONE/774)
+           [27 ALL FREE  COURSE](https://t.me/HSC_ADMISSION_ZONE/780)
 
-**❶** **[HSC26 PCMB All Course](https://t.me/HSCGeniusHubMZ/92)**
-**❷** **[HSC27 PCMB All Course](https://t.me/HSCGeniusHubMZ/93)** **❸** **[All EBI Course](https://t.me/HSCGeniusHubMZ/94)**
+📛CHANNEL-1: [HSC & ADMISSION ZONE](https://t.me/HSC_ADMISSION_ZONE)
+🔰CHANNEL-2: [HSC & ADMISSION ZONE (PAID)](https://t.me/hsc_admission_zone_paid)
+🔶CHANNEL-3 : [HSC & ADMISISON ZONE (ARTS)](https://t.me/HSC_ADMISSION_ZONE_ARTS)
 
-**➟ তাহলে আর দেরি কেন? এখনই** **[HSC Genius Hub](https://t.me/HSCGeniusHubMZ)** **এর সাথে যুক্ত হও!!**
-
-**⎙ কোর্স কিনতে নক করুন: ➤ @HSCGeniusHubBot**
-
-**⁀➴ প্রধান চ্যানেল:** **[HSC Genius Hub](https://t.me/HSCGeniusHubMZ)**
-
-**────୨ৎ────**
-"""
+ ❗ Most Trusted Education Channel Telegram ❗
+ """
 
 # --- ২. গ্লোবাল ভেরিয়েবল ---
 clients = []           
