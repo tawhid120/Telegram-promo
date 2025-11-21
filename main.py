@@ -39,26 +39,12 @@ target_groups = [
 image_path = 'replit2.jpg' 
 
 message_text = """
-**HSC & ADMISSION ZONE**
-**বিশ্বস্ততার সঙ্গে বিজ্ঞান ও আর্টস বিভাগের একাডেমিক ও অ্যাডমিশন বিষয়ক বিভিন্ন শিক্ষামুলক কোর্স  ফ্রি এবং স্বল্পমুল্যে প্রদান করে আসছে আমাদের চ্যানেল!**
+🎓 HSC & Admission Guideline Channel
+যারা সত্যি সিরিয়াসলি HSC + ভর্তি প্রস্তুতি নিতে চাও — এখানে পাচ্ছো দৈনিক টিপস, স্টাডি স্ট্র্যাটেজি, MCQ গাইডলাইন আর মোটিভেশন।
 
-➥ INDEX
-
-🔴[25 ALL Admission Course](https://t.me/HSC_ADMISSION_ZONE/543)
-         [25 FREE ADMISSION COURSE](https://t.me/HSC_ADMISSION_ZONE/549)
-
-🟢[26 ALL Academic Course](https://t.me/HSC_ADMISSION_ZONE/2)
-           [26 ALL FREE COURSE](https://t.me/HSC_ADMISSION_ZONE/779)
-
-🔵[27 ALL Academic  Course](https://t.me/HSC_ADMISSION_ZONE/774)
-           [27 ALL FREE  COURSE](https://t.me/HSC_ADMISSION_ZONE/780)
-
-📛CHANNEL-1: [HSC & ADMISSION ZONE](https://t.me/HSC_ADMISSION_ZONE)
-🔰CHANNEL-2: [HSC & ADMISSION ZONE (PAID)](https://t.me/hsc_admission_zone_paid)
-🔶CHANNEL-3 : [HSC & ADMISISON ZONE (ARTS)](https://t.me/HSC_ADMISSION_ZONE_ARTS)
-
- ❗ Most Trusted Education Channel Telegram ❗
- """
+👉 জয়েন করো: https://t.me/guildeline01
+সঠিক গাইডলাইনেই সঠিক প্রস্তুতি। 🚀
+"""
 
 # --- ২. গ্লোবাল ভেরিয়েবল ---
 clients = []           
