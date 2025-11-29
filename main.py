@@ -1,192 +1,139 @@
 import asyncio
 import logging
 import os
-import random
-from itertools import cycle
-from telethon import TelegramClient, events, sessions
-from telethon.errors import (
-    FloodWaitError, 
-    UserBannedInChannelError, 
-    ChatWriteForbiddenError, 
-    ChannelPrivateError,
-    ChatAdminRequiredError,
-    UserNotParticipantError
-)
+from pyrogram import Client, filters, idle
+from pyrogram.errors import FloodWait, ChatWriteForbidden
 
-# --- ১. লগিং এবং কনফিগারেশন ---
+# --- ১. কনফিগারেশন ---
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    datefmt='%H:%M:%S'
+    format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
-api_id = 20193909
-api_hash = '82cd035fc1eb439bda68b2bfc75a57cb'
+API_ID = 20193909
+API_HASH = '82cd035fc1eb439bda68b2bfc75a57cb'
 
-# সেশন স্ট্রিং (আপনার এনভায়রনমেন্ট বা সরাসরি স্ট্রিং)
-session_strings = [
+# Pyrogram সেশন স্ট্রিং (Telethon এর স্ট্রিং এখানে কাজ করবে না, নতুন করে জেনারেট করতে হবে)
+SESSION_STRINGS = [
     os.environ.get('SESSION_1'), 
     os.environ.get('SESSION_2'),
-    os.environ.get('SESSION_3')
+    # আরও থাকলে এখানে যোগ করো
 ]
 
-target_groups = [
+# টার্গেট গ্রুপগুলোর ইউজারনেম (লিংক ছাড়া, শুধু ইউজারনেম)
+TARGET_GROUPS = [
     'chemistryteli', 'hsc_sharing', 'linkedstudies', 'hsc234', 'buetkuetruetcuet',
     'thejournyofhsc24', 'haters_hsc', 'Dacs2025', 'superb1k', 'studywar2021',
     'Acs_Udvash_Link', 'DiscussionGroupEngineering', 'HHEHRETW'
 ]
 
-image_path = 'IMG_20251129_133248_466.jpg' 
+# ছবির পাথ (তোমার ফোল্ডারে যেন এই নামের ছবি থাকে)
+IMAGE_PATH = 'IMG_20251129_133248_466.jpg'
 
-message_text = """
-**𝐅𝐑𝐄𝐄 𝐂𝐎𝐔𝐑𝐒𝐄 𝐁𝐀𝐍𝐆𝐋𝐀𝐃𝐄𝐒𝐇**
+# --- ২. হুবহু টেমপ্লেট (Markdown ফরম্যাটে) ---
+# স্ক্রিনশটের মতো দেখতে > (Quote) এবং ** (Bold) ব্যবহার করা হয়েছে
+CAPTION_TEXT = """
+**FREE COURSE BANGLADESH**
 
 **ফ্রি কোর্স বাংলাদেশ** টেলিগ্রামের সবচেয়ে বিশ্বস্ত এডুকেশনাল চ্যানেল।
 
 এখানে রয়েছে ২৫, ২৬ ও ২৭ ব্যাচের জন্য ১০০+ ফ্রি কোর্স, যার মাধ্যমে তুমি সম্পূর্ণ ফ্রিতে তোমার এইচএসসি প্রস্তুতি শেষ করতে পারবে। নিচে আমাদের অফিশিয়াল ইনডেক্স লিংক দেওয়া হলো একবার ঘুরে দেখে আসো।
 
-➤ (𝐅𝐂𝐁𝐃 𝐅𝐑𝐄𝐄 𝐂𝐎𝐔𝐑𝐒𝐄 𝐈𝐍𝐃𝐄𝐗)[https://t.me/FCBD_OFFICIAL/439]
+➤ [FCBD FREE COURSE INDEX](https://t.me/FCBD_OFFICIAL/439)
 
-⍟ 𝙼𝙰𝙸𝙽 𝙲𝙷𝙰𝙽𝙽𝙴𝙻 [𝙵𝚁𝙴𝙴] 
-**➳ @FCBD_OFFICIAL**
+✪ MAIN CHANNEL [FREE] 
+➳ @FCBD_OFFICIAL
 """
 
-# --- ২. গ্লোবাল ভেরিয়েবল ---
-clients = []           
-sender_cycle = None    
-debounce_tasks = {}    
-my_bot_ids = []        # আমাদের নিজেদের অ্যাকাউন্টের আইডি লিস্ট
-WAIT_TIME = 15         
+# গ্লোবাল ভেরিয়েবলস
+clients = []
+my_user_ids = []
+processed_chats = {} # টাইমার হ্যান্ডেল করার জন্য
 
-# --- ৩. হেল্পার ফাংশন: সব অ্যাকাউন্ট চালু করা ---
-async def init_clients():
-    global sender_cycle, my_bot_ids
-    active_clients = []
-    my_bot_ids = [] # আইডি লিস্ট রিসেট
-    
-    print("🔄 অ্যাকাউন্টগুলো কানেক্ট করা হচ্ছে এবং আইডি চেক করা হচ্ছে...")
-    
-    for i, s_str in enumerate(session_strings):
-        if not s_str: continue
+# --- ৩. ক্লায়েন্ট সেটআপ ---
+async def start_clients():
+    print("🔄 অ্যাকাউন্টগুলো কানেক্ট করা হচ্ছে...")
+    for i, session in enumerate(SESSION_STRINGS):
+        if not session: continue
         try:
-            client = TelegramClient(
-                sessions.StringSession(s_str), 
-                api_id, api_hash,
-                device_model=f"HSC Bot {i+1}",
-                app_version="3.5 Fix"
-            )
-            await client.start()
-            me = await client.get_me()
-            
-            # আইপি লিস্টে নিজের আইডি যোগ করা
-            my_bot_ids.append(me.id)
-            active_clients.append(client)
-            
-            print(f"✅ অ্যাকাউন্ট {i+1} রেডি: {me.first_name} (ID: {me.id})")
-            
+            app = Client(f"account_{i}", api_id=API_ID, api_hash=API_HASH, session_string=session)
+            await app.start()
+            me = await app.get_me()
+            clients.append(app)
+            my_user_ids.append(me.id)
+            print(f"✅ অ্যাকাউন্ট {i+1} রেডি: {me.first_name}")
         except Exception as e:
             print(f"❌ অ্যাকাউন্ট {i+1} এরর: {e}")
-
-    if not active_clients:
+    
+    if not clients:
         print("⛔ কোনো অ্যাকাউন্ট কানেক্ট করা যায়নি।")
         exit()
-        
-    sender_cycle = cycle(active_clients)
-    print(f"🛡️ ইগনোর লিস্ট তৈরি সম্পন্ন: {my_bot_ids}")
-    return active_clients
 
-# --- ৪. স্মার্ট সেন্ডিং ফাংশন ---
-async def send_smart_message(chat_id, chat_name):
-    global sender_cycle
+# --- ৪. মেসেজ সেন্ডিং লজিক ---
+async def send_ad_message(chat_id):
+    # সাইক্লিং লজিক (র‍্যান্ডমলি বা সিরিয়াল অনুযায়ী একটা আইডি পিক করবে)
+    import random
+    sender_app = random.choice(clients)
     
-    file_to_send = image_path if os.path.exists(image_path) else None
-    attempts = len(clients)
-    sent_success = False
-    
-    logging.info(f"🚀 '{chat_name}' - মেসেজ পাঠানোর প্রসেস শুরু...")
-
-    for _ in range(attempts):
-        current_client = next(sender_cycle)
-        me = await current_client.get_me()
-        
-        try:
-            await current_client.send_message(
-                chat_id,
-                message_text,
-                file=file_to_send,
-                link_preview=False
-            )
-            logging.info(f"✅ সফল! '{me.first_name}' মেসেজ পাঠিয়েছে।")
-            sent_success = True
-            break 
-            
-        except (UserNotParticipantError, ChannelPrivateError):
-            logging.warning(f"⚠️ '{me.first_name}' গ্রুপে নেই। স্কিপ...")
-        except (ChatWriteForbiddenError, UserBannedInChannelError):
-            logging.warning(f"🚫 '{me.first_name}' ব্যানড। স্কিপ...")
-        except FloodWaitError as e:
-            logging.warning(f"⏳ '{me.first_name}' ফ্লাড ওয়েট ({e.seconds}s)। স্কিপ...")
-        except Exception as e:
-            logging.error(f"❌ সমস্যা ({me.first_name}): {e}")
-
-    if not sent_success:
-        logging.error(f"⛔ সব অ্যাকাউন্ট ব্যর্থ হয়েছে '{chat_name}' এ।")
-
-# --- ৫. টাইমার এবং ফিল্টার হ্যান্ডলার ---
-async def debounce_handler(event):
-    # ১. নিজের আইডি চেক (সবচেয়ে গুরুত্বপূর্ণ অংশ)
-    sender_id = event.sender_id
-    
-    # যদি মেসেজ পাঠানো ব্যক্তি আমাদের নিজেদের ৩টা অ্যাকাউন্টের একটা হয়, তবে থামো
-    if sender_id in my_bot_ids:
-        return # চুপচাপ বের হয়ে যাও, কোনো লগ বা রিপ্লাই দরকার নেই
-
-    chat_id = event.chat_id
-    chat_name = getattr(event.chat, 'title', str(chat_id))
-    
-    # ২. আগের টাইমার বাতিল করা (রিস্টার্ট লজিক)
-    if chat_id in debounce_tasks:
-        task = debounce_tasks[chat_id]
-        if not task.done():
-            task.cancel() 
-
-    # ৩. নতুন টাইমার শুরু
-    debounce_tasks[chat_id] = asyncio.create_task(process_delayed_message(chat_id, chat_name))
-
-async def process_delayed_message(chat_id, chat_name):
     try:
-        # ১৫ সেকেন্ড অপেক্ষা
-        await asyncio.sleep(WAIT_TIME)
-        
-        # সময় শেষ, এখন মেসেজ পাঠাও
-        await send_smart_message(chat_id, chat_name)
-        
-        if chat_id in debounce_tasks:
-            del debounce_tasks[chat_id]
-            
-    except asyncio.CancelledError:
-        # নতুন মেসেজ এসেছে, তাই এই টাস্ক বাতিল
-        pass
+        # ছবি এবং ক্যাপশন পাঠানো
+        await sender_app.send_photo(
+            chat_id=chat_id,
+            photo=IMAGE_PATH,
+            caption=CAPTION_TEXT
+        )
+        logging.info(f"🚀 মেসেজ পাঠানো হয়েছে চ্যাট ID: {chat_id} - {sender_app.me.first_name} দিয়ে")
+    except FloodWait as e:
+        logging.warning(f"⏳ FloodWait: {e.value} সেকেন্ড অপেক্ষা করতে হবে।")
+        await asyncio.sleep(e.value)
+    except ChatWriteForbidden:
+        logging.error(f"🚫 এই গ্রুপে মেসেজ লেখার অনুমতি নেই: {chat_id}")
+    except Exception as e:
+        logging.error(f"❌ সমস্যা হয়েছে: {e}")
 
-# --- ৬. মেইন ফাংশন ---
+# --- ৫. মেইন হ্যান্ডলার ---
 async def main():
-    global clients
+    await start_clients()
     
-    clients = await init_clients()
-    
-    # মনিটরিংয়ের জন্য শুধুমাত্র ১ম ক্লায়েন্ট ব্যবহার
-    monitor_client = clients[0] 
-    me = await monitor_client.get_me()
-    
-    print(f"\n👁️ মনিটরিং করছে: {me.first_name}")
-    print(f"🚫 নিজেদের আইডি ফিল্টার চালু আছে।")
+    # মনিটরিং করার জন্য প্রথম ক্লায়েন্ট ব্যবহার করছি (যেকোনো একটা হলেই হয়)
+    monitor_app = clients[0]
+
+    print("\n👁️ মনিটরিং শুরু হয়েছে...")
     print("--------------------------------------------------")
 
-    @monitor_client.on(events.NewMessage(chats=target_groups, incoming=True))
-    async def handler(event):
-        await debounce_handler(event)
+    @monitor_app.on_message(filters.chat(TARGET_GROUPS) & ~filters.me)
+    async def incoming_handler(client, message):
+        chat_id = message.chat.id
+        
+        # যদি মেসেজটি আমাদের নিজেদের কোনো বটের হয়, ইগনোর করো
+        if message.from_user and message.from_user.id in my_user_ids:
+            return
 
-    await monitor_client.run_until_disconnected()
+        # ডিবাউন্স লজিক (একই গ্রুপে বারবার মেসেজ না যাওয়ার জন্য)
+        # যদি এই গ্রুপে অলরেডি টাইমার চলতে থাকে, সেটা বাতিল করো এবং নতুন করে শুরু করো
+        if chat_id in processed_chats:
+            processed_chats[chat_id].cancel()
+        
+        # নতুন টাস্ক তৈরি
+        processed_chats[chat_id] = asyncio.create_task(wait_and_send(chat_id))
+
+    async def wait_and_send(chat_id):
+        try:
+            # ১৫ সেকেন্ড অপেক্ষা (যাতে মনে হয় মানুষ রিপ্লাই দিচ্ছে)
+            await asyncio.sleep(15)
+            await send_ad_message(chat_id)
+        except asyncio.CancelledError:
+            pass # নতুন মেসেজ আসলে আগেরটা বাতিল হবে
+        finally:
+            processed_chats.pop(chat_id, None)
+
+    # প্রোগ্রাম রানিং রাখা
+    await idle()
+    
+    # সব ক্লায়েন্ট বন্ধ করা
+    for app in clients:
+        await app.stop()
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())
