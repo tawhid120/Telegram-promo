@@ -32,18 +32,23 @@ IMAGE_PATH = 'IMG_20251129_133248_466.jpg'
 
 # --- ২. হুবহু টেমপ্লেট (Markdown ফরম্যাটে) ---
 # স্ক্রিনশটের মতো দেখতে > (Quote) এবং ** (Bold) ব্যবহার করা হয়েছে
+# এই ভেরিয়েবলটি তোমার কোডে ব্যবহার করো
 CAPTION_TEXT = """
-**FREE COURSE BANGLADESH**
+> **FREE COURSE BANGLADESH**
 
 **ফ্রি কোর্স বাংলাদেশ** টেলিগ্রামের সবচেয়ে বিশ্বস্ত এডুকেশনাল চ্যানেল।
 
 এখানে রয়েছে ২৫, ২৬ ও ২৭ ব্যাচের জন্য ১০০+ ফ্রি কোর্স, যার মাধ্যমে তুমি সম্পূর্ণ ফ্রিতে তোমার এইচএসসি প্রস্তুতি শেষ করতে পারবে। নিচে আমাদের অফিশিয়াল ইনডেক্স লিংক দেওয়া হলো একবার ঘুরে দেখে আসো।
 
-➤ [FCBD FREE COURSE INDEX](https://t.me/FCBD_OFFICIAL/439)
+➤ [(FCBD FREE COURSE INDEX)](https://t.me/FCBD_OFFICIAL/439)
 
-✪ MAIN CHANNEL [FREE] 
-➳ @FCBD_OFFICIAL
+> ✪ MAIN CHANNEL [FREE] 
+> ➳ @FCBD_OFFICIAL
 """
+
+# মেসেজ পাঠানোর সময় এভাবে লিখবে:
+# await app.send_photo(chat_id, photo=IMAGE_PATH, caption=CAPTION_TEXT)
+
 
 # গ্লোবাল ভেরিয়েবলস
 clients = []
