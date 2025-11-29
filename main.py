@@ -36,7 +36,7 @@ target_groups = [
     'Acs_Udvash_Link', 'DiscussionGroupEngineering', 'HHEHRETW'
 ]
 
-image_path = 'replit2.jpg' 
+image_path = 'IMG_20251129_133248_466.jpg' 
 
 message_text = """
 **𝐅𝐑𝐄𝐄 𝐂𝐎𝐔𝐑𝐒𝐄 𝐁𝐀𝐍𝐆𝐋𝐀𝐃𝐄𝐒𝐇**
