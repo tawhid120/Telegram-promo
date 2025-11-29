@@ -1,4 +1,5 @@
-Telethon
+tgcrypto
+pyrofork 
 Flask
 gunicorn
 TGCrypto
