@@ -24,7 +24,7 @@ SESSION_STRINGS = [
 TARGET_GROUPS = [
     'chemistryteli', 'hsc_sharing', 'linkedstudies', 'hsc234', 'buetkuetruetcuet',
     'thejournyofhsc24', 'haters_hsc', 'Dacs2025', 'superb1k', 'studywar2021',
-    'Acs_Udvash_Link', 'DiscussionGroupEngineering', 'HHEHRETW', 'hscacademicandadmissionchatgroup'
+    'Acs_Udvash_Link', 'DiscussionGroupEngineering', 'HHEHRETW', 'hscacademicandadmissionchatgroup', -1001549949017, -1002250041542
 ]
 
 # ছবির পাথ
