@@ -28,8 +28,8 @@ TARGET_GROUPS = [
 ]
 
 # ডিফল্ট ছবি (যদি কোনো টেমপ্লেটে ছবির নাম না থাকে)
-DEFAULT_IMAGE = 'IMG-20251205-WA0022.jpg'
-TEMPLATE_FILE = 'guideline.txt'
+DEFAULT_IMAGE = 'gmail.jpg'
+TEMPLATE_FILE = 'Gmail.txt'
 
 # গ্লোবাল ভেরিয়েবলস
 clients = []
