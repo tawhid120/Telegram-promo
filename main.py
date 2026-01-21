@@ -32,7 +32,7 @@ IGNORED_BOTS = ['MissRose_bot']
 
 # ডিফল্ট ছবি (যদি কোনো টেমপ্লেটে ছবির নাম না থাকে)
 DEFAULT_IMAGE = 'gmail.jpg'
-TEMPLATE_FILE = 'Gmail.txt'
+TEMPLATE_FILE = 'guideline.txt'
 
 # গ্লোবাল ভেরিয়েবলস
 clients = []
