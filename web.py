@@ -26,137 +26,384 @@ DASHBOARD_HTML = """
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Telegram Promo Bot</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0d0f1a; --surface: #151828; --card: #1c2035;
-            --border: #2a3050; --accent: #4f8ef7; --accent2: #7c5af7;
-            --green: #3dd68c; --red: #f75a5a; --yellow: #f7c948;
-            --text: #e8eaf6; --muted: #6b7394;
+            --bg:      #07080f;
+            --surface: #0e1018;
+            --card:    #12151f;
+            --card2:   #161a26;
+            --border:  rgba(255,255,255,0.06);
+            --border2: rgba(255,255,255,0.11);
+            --teal:    #00e5c3;
+            --blue:    #3b82f6;
+            --purple:  #a855f7;
+            --rose:    #f43f5e;
+            --amber:   #f59e0b;
+            --text:    #f0f2ff;
+            --muted:   #525878;
+            --muted2:  #7b82a8;
         }
-        * { margin:0; padding:0; box-sizing:border-box; }
+
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
         body {
-            background: var(--bg); color: var(--text);
-            font-family: 'Noto Sans Bengali', sans-serif; min-height: 100vh;
-            background-image: radial-gradient(ellipse at 20% 20%, rgba(79,142,247,0.07) 0%, transparent 60%),
-                              radial-gradient(ellipse at 80% 80%, rgba(124,90,247,0.07) 0%, transparent 60%);
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Sora', 'Noto Sans Bengali', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
+
+        /* Animated background glow */
+        body::before {
+            content: '';
+            position: fixed; inset: 0; z-index: 0;
+            background:
+                radial-gradient(ellipse 80% 60% at 10% 0%,   rgba(0,229,195,0.055) 0%, transparent 55%),
+                radial-gradient(ellipse 60% 50% at 90% 100%, rgba(168,85,247,0.065) 0%, transparent 55%),
+                radial-gradient(ellipse 50% 40% at 50% 50%,  rgba(59,130,246,0.035) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        /* Subtle scanline texture */
+        body::after {
+            content: '';
+            position: fixed; inset: 0; z-index: 0;
+            background-image: repeating-linear-gradient(
+                0deg, transparent, transparent 2px,
+                rgba(0,0,0,0.12) 2px, rgba(0,0,0,0.12) 4px
+            );
+            pointer-events: none;
+            opacity: 0.25;
+        }
+
+        /* ── HEADER ── */
         header {
-            background: var(--surface); border-bottom: 1px solid var(--border);
-            padding: 20px 40px; display: flex; align-items: center; gap: 16px;
+            position: relative; z-index: 10;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px 36px;
+            background: rgba(14,16,24,0.85);
+            backdrop-filter: blur(24px);
+            border-bottom: 1px solid var(--border2);
         }
-        .logo {
-            width:44px; height:44px;
-            background: linear-gradient(135deg, var(--accent), var(--accent2));
-            border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px;
+
+        .header-left { display: flex; align-items: center; gap: 14px; }
+
+        .logo-wrap {
+            position: relative;
+            width: 48px; height: 48px; flex-shrink: 0;
         }
-        header h1 { font-size:20px; font-weight:700; }
-        header p  { color:var(--muted); font-size:13px; margin-top:2px; }
-        .container { max-width:900px; margin:40px auto; padding:0 24px; }
-        .status-banner {
-            background:var(--card); border:1px solid var(--border); border-radius:16px;
-            padding:24px 28px; display:flex; align-items:center; gap:16px; margin-bottom:28px;
+        .logo-ring {
+            position: absolute; inset: 0;
+            border-radius: 50%;
+            border: 1px dashed rgba(0,229,195,0.3);
+            animation: spin 10s linear infinite;
         }
-        .pulse-dot {
-            width:14px; height:14px; border-radius:50%; background:var(--green);
-            box-shadow:0 0 0 0 rgba(61,214,140,0.5); animation:pulse 2s infinite; flex-shrink:0;
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .logo-inner {
+            position: absolute; inset: 8px;
+            background: linear-gradient(135deg, rgba(0,229,195,0.2), rgba(59,130,246,0.2));
+            border: 1px solid rgba(0,229,195,0.3);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 17px;
         }
-        .pulse-dot.offline { background:var(--red); animation:none; }
-        @keyframes pulse {
-            0%   { box-shadow: 0 0 0 0 rgba(61,214,140,0.5); }
-            70%  { box-shadow: 0 0 0 10px rgba(61,214,140,0); }
-            100% { box-shadow: 0 0 0 0 rgba(61,214,140,0); }
+
+        .brand h1 {
+            font-size: 16px; font-weight: 700; letter-spacing: -0.02em;
+            background: linear-gradient(90deg, #fff 30%, var(--teal) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
-        .status-text h2 { font-size:17px; font-weight:600; }
-        .status-text p  { color:var(--muted); font-size:13px; margin-top:4px; font-family:'JetBrains Mono',monospace; }
-        .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:16px; margin-bottom:28px; }
-        .card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:22px 24px; }
-        .card-label { color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.08em; margin-bottom:10px; }
-        .card-value { font-size:28px; font-weight:700; font-family:'JetBrains Mono',monospace; }
-        .green{color:var(--green);} .blue{color:var(--accent);} .purple{color:var(--accent2);} .err{color:var(--red);}
-        .section-title { font-size:13px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; margin-bottom:12px; }
-        .log-box {
-            background:var(--card); border:1px solid var(--border); border-radius:14px;
-            padding:16px 20px; font-family:'JetBrains Mono',monospace; font-size:12px;
-            line-height:1.9; color:var(--muted); max-height:260px; overflow-y:auto; margin-bottom:24px;
+        .brand p { color: var(--muted); font-size: 10.5px; margin-top: 3px; letter-spacing: 0.07em; text-transform: uppercase; }
+
+        .status-pill {
+            display: flex; align-items: center; gap: 7px;
+            padding: 7px 16px; border-radius: 999px;
+            font-size: 12px; font-weight: 600;
+            border: 1px solid rgba(0,229,195,0.25);
+            background: rgba(0,229,195,0.07);
+            color: var(--teal);
+            transition: all 0.3s;
         }
-        .entry { border-bottom:1px solid var(--border); padding:4px 0; }
-        .entry:last-child { border-bottom:none; }
-        .ok   { color:var(--green); }
-        .warn { color:var(--yellow); }
-        .bad  { color:var(--red); }
-        .refresh { color:var(--muted); font-size:12px; text-align:right; margin-bottom:8px; }
-        footer { text-align:center; color:var(--muted); font-size:12px; padding:32px 0 20px; }
+        .status-pill.down {
+            border-color: rgba(244,63,94,0.25);
+            background: rgba(244,63,94,0.07);
+            color: var(--rose);
+        }
+        .blink-dot {
+            width: 7px; height: 7px; border-radius: 50%;
+            background: var(--teal);
+            box-shadow: 0 0 8px var(--teal);
+            animation: blink 1.4s ease-in-out infinite;
+        }
+        .blink-dot.down { background: var(--rose); box-shadow: 0 0 8px var(--rose); animation: none; }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.25} }
+
+        /* ── LAYOUT ── */
+        .container {
+            position: relative; z-index: 5;
+            max-width: 980px; margin: 32px auto; padding: 0 24px;
+        }
+
+        /* ── HERO CARD ── */
+        .hero {
+            background: var(--card);
+            border: 1px solid var(--border2);
+            border-radius: 20px;
+            padding: 28px 30px;
+            margin-bottom: 20px;
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 20px; overflow: hidden; position: relative;
+        }
+        .hero::before {
+            content: '';
+            position: absolute; top: -60px; right: -60px;
+            width: 220px; height: 220px;
+            background: radial-gradient(circle, rgba(0,229,195,0.09) 0%, transparent 70%);
+            border-radius: 50%; pointer-events: none;
+        }
+        .hero-left { display: flex; align-items: center; gap: 18px; }
+        .hero-avatar {
+            width: 58px; height: 58px; border-radius: 16px; flex-shrink: 0;
+            background: linear-gradient(135deg, rgba(0,229,195,0.12), rgba(59,130,246,0.12));
+            border: 1px solid rgba(0,229,195,0.2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 28px;
+        }
+        .hero-text h2 { font-size: 19px; font-weight: 700; letter-spacing: -0.02em; }
+        .hero-text p {
+            color: var(--muted2); font-size: 12px; margin-top: 6px;
+            font-family: 'JetBrains Mono', monospace; letter-spacing: 0.01em;
+        }
+        .hero-right { text-align: right; flex-shrink: 0; }
+        .hero-right .lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+        .hero-right .val {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 24px; font-weight: 700; color: var(--teal);
+            letter-spacing: -0.02em; margin-top: 4px;
+        }
+
+        /* ── STATS GRID ── */
+        .grid4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px; margin-bottom: 20px;
+        }
+        @media(max-width:680px){ .grid4{ grid-template-columns: repeat(2,1fr); } }
+
+        .scard {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px 18px 16px;
+            position: relative; overflow: hidden;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+        .scard:hover { border-color: var(--border2); transform: translateY(-2px); }
+        .scard::after {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0;
+            height: 2px; border-radius: 16px 16px 0 0;
+        }
+        .scard.t-teal::after   { background: linear-gradient(90deg, var(--teal),   transparent 80%); }
+        .scard.t-purple::after { background: linear-gradient(90deg, var(--purple), transparent 80%); }
+        .scard.t-rose::after   { background: linear-gradient(90deg, var(--rose),   transparent 80%); }
+        .scard.t-blue::after   { background: linear-gradient(90deg, var(--blue),   transparent 80%); }
+
+        .scard-icon { font-size: 20px; margin-bottom: 12px; }
+        .scard-lbl  { color: var(--muted2); font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+        .scard-val  { font-family: 'JetBrains Mono', monospace; font-size: 28px; font-weight: 700; line-height: 1; }
+        .c-teal   { color: var(--teal); }
+        .c-purple { color: var(--purple); }
+        .c-rose   { color: var(--rose); }
+        .c-blue   { color: var(--blue); }
+        .c-green  { color: #22c55e; }
+
+        /* ── LOG PANEL ── */
+        .panel {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+        .panel-top {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 13px 20px;
+            background: var(--card2);
+            border-bottom: 1px solid var(--border);
+        }
+        .panel-label {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 11.5px; font-weight: 600; letter-spacing: 0.07em;
+            text-transform: uppercase; color: var(--muted2);
+        }
+        .panel-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--teal);
+            animation: blink 1.4s ease-in-out infinite;
+        }
+        .badge-refresh {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px; color: var(--muted);
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 999px; padding: 3px 10px;
+        }
+
+        .log-body {
+            padding: 10px 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11.5px; line-height: 1.85;
+            max-height: 290px; overflow-y: auto;
+        }
+        .log-body::-webkit-scrollbar { width: 3px; }
+        .log-body::-webkit-scrollbar-track { background: transparent; }
+        .log-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+
+        .log-row {
+            display: block; padding: 2px 20px;
+            border-left: 2px solid transparent;
+            color: var(--muted2);
+            transition: background 0.12s;
+        }
+        .log-row:hover { background: rgba(255,255,255,0.022); }
+        .log-row.ok  { border-left-color: var(--teal);   color: rgba(0,229,195,0.82); }
+        .log-row.err { border-left-color: var(--rose);   color: rgba(244,63,94,0.82); }
+        .log-row.wrn { border-left-color: var(--amber);  color: rgba(245,158,11,0.82); }
+
+        /* ── FOOTER ── */
+        footer {
+            position: relative; z-index: 5;
+            text-align: center; padding: 20px 0 28px;
+            color: var(--muted); font-size: 11px; letter-spacing: 0.05em;
+        }
+        footer span { color: var(--muted2); }
+
+        /* ── FADE-IN ANIMATION ── */
+        @keyframes fadeUp {
+            from { opacity:0; transform:translateY(14px); }
+            to   { opacity:1; transform:translateY(0); }
+        }
+        .container > * { animation: fadeUp 0.45s ease both; }
+        .container > *:nth-child(1){ animation-delay:0.04s; }
+        .container > *:nth-child(2){ animation-delay:0.10s; }
+        .container > *:nth-child(3){ animation-delay:0.17s; }
+        .container > *:nth-child(4){ animation-delay:0.24s; }
     </style>
-    <script> setTimeout(() => location.reload(), 20000); </script>
+    <script>setTimeout(() => location.reload(), 20000);</script>
 </head>
 <body>
+
+<!-- HEADER -->
 <header>
-    <div class="logo">📢</div>
-    <div>
-        <h1>Telegram Promo Bot</h1>
-        <p>Automated group message broadcaster</p>
+    <div class="header-left">
+        <div class="logo-wrap">
+            <div class="logo-ring"></div>
+            <div class="logo-inner">📢</div>
+        </div>
+        <div class="brand">
+            <h1>Telegram Promo Bot</h1>
+            <p>Automated Broadcast System</p>
+        </div>
+    </div>
+    <div class="status-pill {{ '' if status.running else 'down' }}">
+        <div class="blink-dot {{ '' if status.running else 'down' }}"></div>
+        {{ 'LIVE' if status.running else 'OFFLINE' }}
     </div>
 </header>
+
+<!-- MAIN -->
 <div class="container">
-    <div class="status-banner">
-        <div class="pulse-dot {{ '' if status.running else 'offline' }}"></div>
-        <div class="status-text">
-            <h2>বট {{ '✅ সক্রিয় আছে' if status.running else '🔄 চালু হচ্ছে...' }}</h2>
-            <p>শুরু হয়েছে: {{ status.started_at or 'N/A' }}</p>
+
+    <!-- Hero -->
+    <div class="hero">
+        <div class="hero-left">
+            <div class="hero-avatar">🤖</div>
+            <div class="hero-text">
+                <h2>{{ 'বট সক্রিয় আছে ✓' if status.running else 'বট চালু হচ্ছে…' }}</h2>
+                <p>
+                    process: {{ 'RUNNING' if status.running else 'STARTING' }}
+                    &nbsp;·&nbsp; auto-restart: ON
+                    &nbsp;·&nbsp; render free tier
+                </p>
+            </div>
+        </div>
+        <div class="hero-right">
+            <div class="lbl">শুরুর সময়</div>
+            <div class="val">{{ status.started_at.split(' ')[1] if status.started_at else '--:--:--' }}</div>
         </div>
     </div>
-    <div class="grid">
-        <div class="card">
-            <div class="card-label">প্রসেস স্ট্যাটাস</div>
-            <div class="card-value {{ 'green' if status.running else 'err' }}">{{ 'LIVE' if status.running else 'DOWN' }}</div>
+
+    <!-- Stats -->
+    <div class="grid4">
+        <div class="scard t-teal">
+            <div class="scard-icon">⚡</div>
+            <div class="scard-lbl">স্ট্যাটাস</div>
+            <div class="scard-val {{ 'c-teal' if status.running else 'c-rose' }}">{{ 'ON' if status.running else 'OFF' }}</div>
         </div>
-        <div class="card">
-            <div class="card-label">মেসেজ পাঠানো</div>
-            <div class="card-value purple">{{ status.messages_sent }}</div>
+        <div class="scard t-purple">
+            <div class="scard-icon">🚀</div>
+            <div class="scard-lbl">মেসেজ পাঠানো</div>
+            <div class="scard-val c-purple">{{ status.messages_sent }}</div>
         </div>
-        <div class="card">
-            <div class="card-label">শুরুর সময়</div>
-            <div class="card-value blue" style="font-size:18px;">{{ status.started_at.split(' ')[1] if status.started_at else '--' }}</div>
+        <div class="scard t-rose">
+            <div class="scard-icon">⚠️</div>
+            <div class="scard-lbl">এরর সংখ্যা</div>
+            <div class="scard-val {{ 'c-rose' if status.errors else 'c-green' }}">{{ status.errors|length }}</div>
         </div>
-        <div class="card">
-            <div class="card-label">এরর সংখ্যা</div>
-            <div class="card-value {{ 'err' if status.errors else 'green' }}">{{ status.errors|length }}</div>
+        <div class="scard t-blue">
+            <div class="scard-icon">📋</div>
+            <div class="scard-lbl">লগ লাইন</div>
+            <div class="scard-val c-blue">{{ status.log_lines|length }}</div>
         </div>
     </div>
-    <div class="refresh">⟳ প্রতি ২০ সেকেন্ডে স্বয়ংক্রিয় আপডেট</div>
-    <div class="section-title">লাইভ লগ (সর্বশেষ ৩০ লাইন)</div>
-    <div class="log-box" id="logbox">
-        {% for line in status.log_lines[-30:] %}
-        <div class="entry">
-            {% if '✅' in line or 'রেডি' in line or '🚀' in line %}
-                <span class="ok">{{ line }}</span>
-            {% elif '❌' in line or 'error' in line.lower() or 'ERROR' in line %}
-                <span class="bad">{{ line }}</span>
-            {% elif '⏳' in line or '⚠️' in line %}
-                <span class="warn">{{ line }}</span>
+
+    <!-- Live Log -->
+    <div class="panel">
+        <div class="panel-top">
+            <div class="panel-label">
+                <div class="panel-dot"></div>
+                লাইভ লগ — সর্বশেষ ৩০ লাইন
+            </div>
+            <div class="badge-refresh">⟳ 20s auto-refresh</div>
+        </div>
+        <div class="log-body" id="logbox">
+            {% for line in status.log_lines[-30:] %}
+            <div class="log-row {% if '✅' in line or '🚀' in line or 'রেডি' in line %}ok{% elif '❌' in line or 'ERROR' in line %}err{% elif '⚠️' in line or '⏳' in line %}wrn{% endif %}">{{ line }}</div>
             {% else %}
-                {{ line }}
-            {% endif %}
+            <div class="log-row">[INFO] লগ লোড হচ্ছে… কয়েক সেকেন্ড অপেক্ষা করুন।</div>
+            {% endfor %}
         </div>
-        {% else %}
-        <div class="entry"><span style="color:var(--accent)">[INFO]</span> লগ লোড হচ্ছে... কয়েক সেকেন্ড অপেক্ষা করুন।</div>
-        {% endfor %}
     </div>
+
+    <!-- Error panel -->
     {% if status.errors %}
-    <div class="section-title">সর্বশেষ এরর</div>
-    <div class="log-box">
-        {% for e in status.errors[-5:] %}
-        <div class="entry bad">⚠️ {{ e }}</div>
-        {% endfor %}
+    <div class="panel">
+        <div class="panel-top">
+            <div class="panel-label" style="color:var(--rose);">
+                <div class="panel-dot" style="background:var(--rose);animation:none;box-shadow:0 0 6px var(--rose);"></div>
+                সর্বশেষ এরর
+            </div>
+        </div>
+        <div class="log-body">
+            {% for e in status.errors[-5:] %}
+            <div class="log-row err">{{ e }}</div>
+            {% endfor %}
+        </div>
     </div>
     {% endif %}
+
 </div>
-<footer>Telegram Promo Bot — Pyrogram + Flask on Render</footer>
+
+<footer>
+    Telegram Promo Bot &nbsp;·&nbsp; <span>Pyrogram</span> + <span>Flask</span> &nbsp;·&nbsp; Deployed on <span>Render</span>
+</footer>
+
 <script>
-    // লগ বক্স নিচে স্ক্রোল করা
     const lb = document.getElementById('logbox');
-    if(lb) lb.scrollTop = lb.scrollHeight;
+    if (lb) lb.scrollTop = lb.scrollHeight;
 </script>
 </body>
 </html>
@@ -183,14 +430,13 @@ def watch_process():
     global bot_process
     while True:
         if bot_process is None or bot_process.poll() is not None:
-            # পুরনো প্রসেস মরে গেলে বা প্রথমবার
             exit_code = bot_process.poll() if bot_process else None
             if exit_code is not None:
                 msg = f"⚠️ main.py বন্ধ হয়ে গেছে (exit={exit_code}), রিস্টার্ট হচ্ছে..."
                 logging.warning(msg)
                 bot_status["log_lines"].append(msg)
                 bot_status["running"] = False
-                time.sleep(5)  # রিস্টার্টের আগে একটু অপেক্ষা
+                time.sleep(5)
 
             logging.info("🔄 main.py চালু করা হচ্ছে subprocess হিসেবে...")
             bot_status["started_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -207,7 +453,6 @@ def watch_process():
             bot_status["log_lines"].append(f"✅ main.py চালু হয়েছে। PID: {bot_process.pid}")
             logging.info(f"✅ main.py PID={bot_process.pid}")
 
-            # লগ রিডার থ্রেড
             t = threading.Thread(target=stream_logs, args=(bot_process,), daemon=True)
             t.start()
 
