@@ -3,3 +3,4 @@ pyrofork
 Flask
 gunicorn
 TGCrypto
+requests
