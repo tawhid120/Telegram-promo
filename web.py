@@ -520,7 +520,7 @@ DASHBOARD_HTML = """
 </div>
 
 <footer>
-    Telegram Promo Bot &nbsp;·&nbsp; <span>Pyrogram</span> + <span>Flask</span> &nbsp;·&nbsp; Deployed on <span>Render</span>
+    Telegram Promo Bot &nbsp;·&nbsp; <span>Pyrogram</span> + <span>Flask</span> &nbsp;·&nbsp; Deployed on <span>server</span>
 </footer>
 
 <script>
