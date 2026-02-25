@@ -31,7 +31,7 @@ TARGET_GROUPS = [
 IGNORED_BOTS = ['MissRose_bot'] 
 
 # ডিফল্ট ছবি (যদি কোনো টেমপ্লেটে ছবির নাম না থাকে)
-DEFAULT_IMAGE = 'gmail.jpg'
+DEFAULT_IMAGE = 'images/gmail.jpg'
 TEMPLATE_FILE = 'guideline.txt'
 
 # গ্লোবাল ভেরিয়েবলস
