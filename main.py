@@ -28,7 +28,7 @@ TARGET_GROUPS = [
 ]
 
 # যে ইউজারনেম বা বটগুলোকে ইগনোর করবেন
-IGNORED_BOTS = ['MissRose_bot'] 
+IGNORED_BOTS = ['MissRose_bot', 'Khalid_miner_1'] 
 
 # ডিফল্ট ছবি (যদি কোনো টেমপ্লেটে ছবির নাম না থাকে)
 DEFAULT_IMAGE = 'images/gmail.jpg'
